@@ -1,0 +1,208 @@
+{
+	"info": {
+		"_postman_id": "67d4f749-e272-4115-bf5d-ec93afdee30b",
+		"name": "SP_API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Web",
+			"item": [
+				{
+					"name": "Client Context - Unauthorized",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "65974219-74b6-40e7-978b-78b990233462",
+								"exec": [
+									"pm.response.to.have.header(\"WWW-Authenticate\");",
+									"var parts = postman.getResponseHeader(\"WWW-Authenticate\").split(',');",
+									"for(var i = 0; i < parts.length;i++){",
+									"    var part = parts[i];",
+									"    if(part.indexOf('client_id') != -1){",
+									"        var resource_id = part.split('=\"')[1];",
+									"        pm.environment.set(\"resource\", resource_id.replace('\"',''));",
+									"    } else if(part.indexOf('Bearer') != -1){",
+									"        var tenant_id = part.split('=\"')[1];",
+									"        pm.environment.set(\"tenant_id\", tenant_id.replace('\"',''));",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{site_url}}/api/contextinfo",
+							"host": [
+								"{{site_url}}"
+							],
+							"path": [
+								"api",
+								"contextinfo"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "cdf12dd0-0020-42cc-91a0-2862d5d02778",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "f5585bc7-cc35-46ff-bbcd-6da8586a15cc",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Auth 2",
+			"item": [
+				{
+					"name": "Get Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9e975c01-a83d-4430-9905-6148bf926828",
+								"exec": [
+									"pm.environment.set(\"access_token\", \"Bearer \" + pm.response.json().access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{client_id}}@{{tenant_id}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}",
+									"type": "text"
+								},
+								{
+									"key": "resource",
+									"value": "{{resource}}/{{domain}}@{{tenant_id}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://accounts.accesscontrol.windows.net/{{tenant_id}}/tokens/OAuth/2",
+							"protocol": "https",
+							"host": [
+								"accounts",
+								"accesscontrol",
+								"windows",
+								"net"
+							],
+							"path": [
+								"{{tenant_id}}",
+								"tokens",
+								"OAuth",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Lists",
+			"item": [
+				{
+					"name": "Get Items",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json;odata=verbose",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{site_url}}/_api/web/lists/getbytitle('DefinicionColumnas')/items",
+							"host": [
+								"{{site_url}}"
+							],
+							"path": [
+								"_api",
+								"web",
+								"lists",
+								"getbytitle('DefinicionColumnas')",
+								"items"
+							],
+							"query": [
+								{
+									"key": "$select",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "$expand",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
